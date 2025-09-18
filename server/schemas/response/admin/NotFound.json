@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "properties": {
+    "err": {
+      "type": "object",
+      "properties": {
+        "errorMessage": {"type": "string", "example": "존재하지 않는 관리자 정보입니다."},
+        "status": {"type": "integer", "example": 404}
+      },
+      "required": ["errorMessage", "status"],
+      "additionalProperties": false
+    },
+    "result": {"type": "boolean", "example": false}
+  },
+  "required": ["err", "result"],
+  "additionalProperties": false
+}

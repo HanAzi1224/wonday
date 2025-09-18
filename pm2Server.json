@@ -1,0 +1,19 @@
+{
+  "apps": [
+    {
+      "name": "aurumworks-api",
+      "script": "./server/app.js",
+      "instances": "1",
+      "watch": false,
+      "merge_logs": true,
+      "max_memory_restart": "500M",
+      "exec_mode": "cluster",
+      "listen_timeout": 50000,
+      "kill_timeout": 5000,
+      "ignore_watch": ["ormconfig.json", "migrations"],
+      "watch_options": {
+        "followSymlinks": false
+      }
+    }
+  ]
+}

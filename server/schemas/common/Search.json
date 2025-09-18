@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "properties": {
+    "srch_kw": {
+      "type": "string",
+      "minLength": 0
+    }  
+  }
+}

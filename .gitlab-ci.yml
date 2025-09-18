@@ -1,0 +1,134 @@
+variables:
+  AWS_DEFAULT_REGION: ap-northeast-2
+  IMAGE_NAME: aurumworks-api
+  REGISTRY_DEVELOPMENT_URL: 506876573492.dkr.ecr.ap-northeast-2.amazonaws.com/aurumworks-api-dev
+  REGISTRY_PRODUCTION_URL: 506876573492.dkr.ecr.ap-northeast-2.amazonaws.com/aurumworks-api-prod
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_DRIVER: overlay2
+
+stages:
+  - push-image
+  - pipeline-development
+  - pipeline-production
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+
+.push-image: &push_image_definition
+  stage: push-image
+  image:
+    name: amazon/aws-cli
+    entrypoint: ['']
+  services:
+    - docker:19.03-dind
+  before_script:
+    - amazon-linux-extras install docker
+    - aws --version
+    - docker --version
+    - aws configure set region $AWS_DEFAULT_REGION
+    - aws configure set aws_access_key_id $AWS_ACCESS_KEY_FROM_BRANCH --profile s3;
+    - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY_FROM_BRANCH --profile s3;
+    - aws configure list --profile s3
+    - aws s3 cp s3://$S3_PATH/$ENV_FILE_PATH ./.env --profile s3
+    - DOCKER_PASSWORD=$(aws ecr get-login-password --profile s3)
+    - echo "$DOCKER_PASSWORD" | docker login --username AWS --password-stdin $REGISTRY_URL
+  script:
+    - docker pull $REGISTRY_URL:latest || true
+    - docker build
+      --cache-from $REGISTRY_URL:latest
+      --build-arg NODE_ENV=$NODE_ENV
+      --tag $REGISTRY_URL:latest
+      --tag $REGISTRY_URL:$CI_COMMIT_SHORT_SHA .
+    - docker push $REGISTRY_URL:$CI_COMMIT_SHORT_SHA
+    - docker push $REGISTRY_URL:latest
+
+push-image-development:
+  <<: *push_image_definition
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "development"'
+  variables:
+    REGISTRY_URL: $REGISTRY_DEVELOPMENT_URL
+    AWS_ACCESS_KEY_FROM_BRANCH: $AWS_ACCESS_KEY
+    AWS_SECRET_ACCESS_KEY_FROM_BRANCH: $AWS_SECRET_ACCESS_KEY
+    NODE_ENV: development
+    S3_PATH: 'tew-env-files/aurumworks'
+    ENV_FILE_PATH: '.env.dev'
+
+push-image-production:
+  <<: *push_image_definition
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+  variables:
+    REGISTRY_URL: $REGISTRY_PRODUCTION_URL
+    AWS_ACCESS_KEY_FROM_BRANCH: $AWS_ACCESS_KEY
+    AWS_SECRET_ACCESS_KEY_FROM_BRANCH: $AWS_SECRET_ACCESS_KEY
+    NODE_ENV: production
+    S3_PATH: 'tew-env-files/aurumworks'
+    ENV_FILE_PATH: '.env.prod'
+
+.migration-deploy: &migration-deploy
+  image: node:18-alpine
+  services:
+    - name: mysql:8.0
+      alias: mysql
+  before_script:
+    - apk update && apk add --no-cache python3 py3-pip
+    - python3 -m venv /venv
+    - source /venv/bin/activate
+    - pip install awscli
+    - aws --version
+    - aws configure set region $AWS_DEFAULT_REGION
+    - aws configure set aws_access_key_id $AWS_ACCESS_KEY_FROM_BRANCH --profile s3;
+    - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY_FROM_BRANCH --profile s3;
+    - aws configure list --profile s3
+    - aws s3 cp s3://$S3_PATH/$ENV_FILE_PATH ./.env --profile s3
+    - npm install --legacy-peer-deps
+    - apk add --no-cache openssh-client
+  script:
+    # - npm run migrate
+    - fid=$(mktemp)
+    - echo "$DEPLOY_KEY" > "$fid"
+    - chmod 400 "$fid"
+    - cat "$fid" | wc -l
+    - scp -v -o StrictHostKeyChecking=no -i "$fid" ./$DOCKER_COMPOSE_FILE "$DEPLOY_USER@$DEPLOY_HOST":/home/ubuntu
+    - scp -v -o StrictHostKeyChecking=no -i "$fid" ./scripts/deploy-stage.sh "$DEPLOY_USER@$DEPLOY_HOST":/home/ubuntu
+    - scp -v -o StrictHostKeyChecking=no -i "$fid" ./scripts/custom.conf "$DEPLOY_USER@$DEPLOY_HOST":/home/ubuntu
+    - ssh -o "StrictHostKeyChecking=no" -i "$fid" "$DEPLOY_USER@$DEPLOY_HOST" aws configure set aws_access_key_id $AWS_ACCESS_KEY_FROM_BRANCH
+    - ssh -o "StrictHostKeyChecking=no" -i "$fid" "$DEPLOY_USER@$DEPLOY_HOST" aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY_FROM_BRANCH
+    - ssh -o "StrictHostKeyChecking=no" -i "$fid" "$DEPLOY_USER@$DEPLOY_HOST" aws configure set region $AWS_DEFAULT_REGION
+    - ssh -o "StrictHostKeyChecking=no" -i "$fid" "$DEPLOY_USER@$DEPLOY_HOST" "$DEPLOY_STAGE_SCRIPT"
+    - rm -rf "$fid"
+
+pipeline-development:
+  stage: pipeline-development
+  <<: *migration-deploy
+  variables:
+    DEPLOY_KEY: $DEPLOY_KEY
+    DEPLOY_HOST: $DEPLOY_HOST_DEVELOPMENT
+    DOCKER_COMPOSE_FILE: 'docker-compose-dev.yml'
+    DEPLOY_STAGE_SCRIPT: 'bash -e deploy-stage.sh'
+    NODE_ENV: development
+    S3_PATH: 'tew-env-files/aurumworks'
+    AWS_ACCESS_KEY_FROM_BRANCH: $AWS_ACCESS_KEY
+    AWS_SECRET_ACCESS_KEY_FROM_BRANCH: $AWS_SECRET_ACCESS_KEY
+    ENV_FILE_PATH: '.env.dev'
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "development"'
+
+pipeline-production:
+  stage: pipeline-production
+  <<: *migration-deploy
+  variables:
+    DEPLOY_KEY: $DEPLOY_KEY
+    DEPLOY_HOST: $DEPLOY_HOST_PRODUCTION
+    DOCKER_COMPOSE_FILE: 'docker-compose-prod.yml'
+    DEPLOY_STAGE_SCRIPT: 'NODE_ENV=production bash -e deploy-stage.sh'
+    NODE_ENV: production
+    S3_PATH: 'tew-env-files/aurumworks'
+    AWS_ACCESS_KEY_FROM_BRANCH: $AWS_ACCESS_KEY
+    AWS_SECRET_ACCESS_KEY_FROM_BRANCH: $AWS_SECRET_ACCESS_KEY
+    ENV_FILE_PATH: '.env.prod'
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'

@@ -1,0 +1,8 @@
+{
+  "properties": {
+    "result": {"example": true},
+    "data": {
+      "example": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkeCI6MTksInVzZXJfaWQiOiJ1c2VyMWRmZGZkZDIzIiwidXNlcl90eXBlIjoiYWRtaW4iLCJpYXQiOjE2ODQ4MjkzNDksImV4cCI6MTY4NDg1NDU0OX0.qM5vVfpTOBxYuQ20X1MMp1ked1nca_AnCrocMY_nddaj4zIkSVnClfhbYj-DV4zPTX2stLgx1vj-3eK7aSBeUbj9NvjhCJVuCAEn1Pqtz3ABn7Za5uRjuE83KZjuIYKbk1H93zd_4d0mVtn54IQumPLHlk591nlXxL_UFOR7asc"
+    }
+  }
+}

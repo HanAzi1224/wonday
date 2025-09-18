@@ -1,0 +1,8 @@
+node_modules/
+admin/
+cron/
+nginx/
+scripts/
+socket/
+.husky/
+test/

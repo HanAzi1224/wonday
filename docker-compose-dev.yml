@@ -1,0 +1,124 @@
+version: '3.6'
+services:
+  aurumworks-dev-api:
+    image: 506876573492.dkr.ecr.ap-northeast-2.amazonaws.com/aurumworks-api-dev:latest
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: '5m'
+        max-file: '1'
+    depends_on:
+      - redis
+    environment:
+      - VIRTUAL_HOST=aurumworks-api-dev.team-everywhere.com
+      - VIRTUAL_PORT=4001
+      - LETSENCRYPT_HOST=aurumworks-api-dev.team-everywhere.com
+      - LETSENCRYPT_EMAIL=developer@team-everywhere.com
+      - TZ=Asia/Seoul
+      - NODE_ENV=development
+      - AWS_DEFAULT_REGION=ap-northeast-2
+    networks:
+      - nginx-proxy
+      - redis-connect
+    links:
+      - redis:redis
+    labels:
+      - autoheal=true
+
+  # aurumworks-dev-admin:
+  #   image: 506876573492.dkr.ecr.ap-northeast-2.amazonaws.com/aurumworks-admin-dev:latest
+  #   restart: always
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       max-size: '5m'
+  #       max-file: '1'
+  #   depends_on:
+  #     - redis
+  #   environment:
+  #     - VIRTUAL_HOST=aurumworks-admin-dev.team-everywhere.com
+  #     - VIRTUAL_PORT=4006
+  #     - LETSENCRYPT_HOST=aurumworks-admin-dev.team-everywhere.com
+  #     - LETSENCRYPT_EMAIL=developer@team-everywhere.com
+  #     - TZ=Asia/Seoul
+  #     - NODE_ENV=development
+  #     - AWS_DEFAULT_REGION=ap-northeast-2
+  #   networks:
+  #     - nginx-proxy
+  #     - redis-connect
+  #   links:
+  #     - redis:redis
+
+  # aurumworks-dev-web:
+  #   image: 506876573492.dkr.ecr.ap-northeast-2.amazonaws.com/aurumworks-web-dev
+  #   restart: always
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       max-size: '5m'
+  #       max-file: '1'
+  #   depends_on:
+  #     - redis
+  #   environment:
+  #     - VIRTUAL_HOST=aurumworks-web-dev.team-everywhere.com
+  #     - VIRTUAL_PORT=3001
+  #     - LETSENCRYPT_HOST=aurumworks-web-dev.team-everywhere.com
+  #     - LETSENCRYPT_EMAIL=developer@team-everywhere.com
+  #     - TZ=Asia/Seoul
+  #     - NODE_ENV=development
+  #     - AWS_DEFAULT_REGION=ap-northeast-2
+  #   networks:
+  #     - nginx-proxy
+  #     - redis-connect
+  #   links:
+  #     - redis:redis
+
+  redis:
+    image: redis:4
+    container_name: redis
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: '5m'
+        max-file: '1'
+    hostname: redis
+    environment:
+      - TZ=Asia/Seoul
+    networks:
+      - redis-connect
+
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    ports:
+      - 80:80
+      - 443:443
+    restart: always
+    volumes:
+      - /nginx/certs:/etc/nginx/certs
+      - /nginx/vhost.d:/etc/nginx/vhost.d
+      - /nginx/html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - /home/ubuntu/custom.conf:/etc/nginx/conf.d/custom.conf
+    labels:
+      - com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy
+    networks:
+      - nginx-proxy
+
+  letsencrypt-nginx-proxy:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    restart: always
+    volumes:
+      - /nginx/certs:/etc/nginx/certs
+      - /nginx/vhost.d:/etc/nginx/vhost.d
+      - /nginx/html:/usr/share/nginx/html
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /nginx/acme:/etc/acme.sh
+    networks:
+      - nginx-proxy
+networks:
+  nginx-proxy:
+    name: nginx-proxy
+  redis-connect:
+    driver: bridge

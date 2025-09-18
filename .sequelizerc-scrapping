@@ -1,0 +1,10 @@
+const path = require('path')
+
+console.log(path.resolve('scrapping', 'config', 'index.js'))
+
+module.exports = {
+  config: path.resolve('scrapping', 'config', 'index.js'),
+  'models-path': path.resolve('scrapping', 'sequelize'),
+  'seeders-path': path.resolve('scrapping', 'sequelize', 'seeders'),
+  'migrations-path': path.resolve('scrapping', 'migrations')
+}

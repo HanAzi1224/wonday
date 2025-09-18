@@ -1,0 +1,29 @@
+version: '3.6'
+services:
+  platform-api-dev:
+    image: api:latest
+    restart: always
+    environment:
+      - VIRTUAL_PORT=4001
+      - TZ=Asia/Seoul
+      - NODE_ENV=local
+    networks:
+      - redis-connect
+
+  redis-server: # 서비스 이름을 더 명확하게 변경
+    image: redis:4
+    container_name: redis-server
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-file: '1'
+        max-size: '20m'
+    environment:
+      - TZ=Asia/Seoul
+    networks:
+      - redis-connect
+
+networks:
+  redis-connect:
+    driver: bridge

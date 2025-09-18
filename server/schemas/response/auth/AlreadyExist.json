@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "properties": {
+    "err": {
+      "type": "object",
+      "properties": {
+        "errorMessage": {"type": "string", "example": "이미 존재하는 아이디입니다."},
+        "status": {"type": "integer", "example": 409}
+      },
+      "required": ["errorMessage", "status"],
+      "additionalProperties": false
+    },
+    "result": {"type": "boolean", "example": false}
+  },
+  "required": ["err", "result"],
+  "additionalProperties": false
+}

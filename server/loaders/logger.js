@@ -8,7 +8,7 @@ const config = require('../config')
 // const fluentTag = 'tew-landing-api'
 // const fluentConfig = {
 //   host: 'localhost',
-//   port: 4001,
+//   port: 4000,
 //   timeout: 3.0,
 //   requireAckResponse: false
 // }

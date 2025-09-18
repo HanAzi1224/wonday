@@ -33,14 +33,18 @@ cache:
     - aws --version
     - docker --version
     - aws configure set region $AWS_DEFAULT_REGION
-    - aws configure set aws_access_key_id $AWS_ACCESS_KEY_FROM_BRANCH --profile s3;
-    - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY_FROM_BRANCH --profile s3;
+    - aws configure set aws_access_key_id $AWS_ACCESS_KEY_FROM_BRANCH --profile s3
+    - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY_FROM_BRANCH --profile s3
     - aws configure list --profile s3
+    - export AWS_PROFILE=s3                               # (추가) 이후 aws 명령 기본 프로필 고정
     - aws s3 cp s3://$S3_PATH/$ENV_FILE_PATH ./.env --profile s3
-    - DOCKER_PASSWORD=$(aws ecr get-login-password --profile s3)
+    - aws sts get-caller-identity                        # (추가) 자격증명 즉시 검증
+    - DOCKER_PASSWORD=$(aws ecr get-login-password --profile s3 --region $AWS_DEFAULT_REGION)   # (변경) 리전 명시
     - echo "$DOCKER_PASSWORD" | docker login --username AWS --password-stdin $REGISTRY_URL
   script:
     - docker pull $REGISTRY_URL:latest || true
+    - export DOCKER_BUILDKIT=1                           # (추가) BuildKit 활성화
+    - export DOCKER_DEFAULT_PLATFORM=linux/amd64         # (추가) 기본 빌드 플랫폼 고정 → amd64 이미지 강제
     - docker build
       --cache-from $REGISTRY_URL:latest
       --build-arg NODE_ENV=$NODE_ENV
@@ -92,7 +96,7 @@ push-image-production:
     - npm install --legacy-peer-deps
     - apk add --no-cache openssh-client
   script:
-    # - npm run migrate
+    - npm run migrate
     - fid=$(mktemp)
     - echo "$DEPLOY_KEY" > "$fid"
     - chmod 400 "$fid"

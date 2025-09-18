@@ -105,7 +105,7 @@ pipeline-development:
   stage: pipeline-development
   <<: *migration-deploy
   variables:
-    DEPLOY_KEY: $DEPLOY_KEY
+    DEPLOY_KEY: $DEPLOY_KEY_DEVELOPMENT
     DEPLOY_HOST: $DEPLOY_HOST_DEVELOPMENT
     DOCKER_COMPOSE_FILE: 'docker-compose-dev.yml'
     DEPLOY_STAGE_SCRIPT: 'bash -e deploy-stage.sh'

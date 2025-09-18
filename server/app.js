@@ -1,6 +1,6 @@
 const {express, init, logger} = require('./loaders')
 
-const port = process.env.PORT || 4000
+const port = process.env.PORT || 4001
 ;(async () => {
   // await init()
   const server = express.listen(port, () => {

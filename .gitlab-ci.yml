@@ -96,7 +96,7 @@ push-image-production:
     - npm install --legacy-peer-deps
     - apk add --no-cache openssh-client
   script:
-    - npm run migrate
+    # - npm run migrate
     - fid=$(mktemp)
     - echo "$DEPLOY_KEY" > "$fid"
     - chmod 400 "$fid"

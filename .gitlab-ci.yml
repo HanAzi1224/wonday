@@ -117,7 +117,7 @@ pipeline-development:
     NODE_ENV: development
     S3_PATH: 'tew-env-files/aurumworks'
     AWS_ACCESS_KEY_FROM_BRANCH: $AWS_ACCESS_KEY_DEVELOPMENT
-    AWS_SECRET_ACCESS_KEY_FROM_BRANCH: $AWS_SECRET_ACCESS_KEY
+    AWS_SECRET_ACCESS_KEY_FROM_BRANCH: $AWS_SECRET_ACCESS_KEY_DEVELOPMENT
     ENV_FILE_PATH: '.env.dev'
   rules:
     - if: '$CI_COMMIT_BRANCH == "development"'

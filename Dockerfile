@@ -1,22 +1,24 @@
-FROM keymetrics/pm2:18-alpine
-# FROM node:7.8
-
-RUN apk add --no-cache curl
-# RUN apt-get update && apt-get install -y build-essential python
-
-ARG NODE_ENV
-ENV NODE_ENV $NODE_ENV
-
-EXPOSE 4001:4001
+# EC2(x86_64) 기준, amd64로 고정
+FROM --platform=linux/amd64 node:20-alpine
 
 WORKDIR /app
 
-COPY ./package*.json ./
-RUN npm i --production
-# RUN sudo apt-get update
-# RUN sudo apt-get install -y build-essential python
-# RUN npm i --development
+# 네이티브 모듈 필요 시 주석 해제
+# RUN apk add --no-cache python3 make g++
 
-COPY ./ ./
+# package 설치(락파일 기준 재현성 높음)
+COPY package*.json ./
+RUN npm ci --omit=dev --no-audit --no-fund
 
-CMD ["sh", "-c", "NODE_ENV=$NODE_ENV pm2-runtime --json pm2Server.json"]
+# 앱 소스
+COPY . .
+
+# pm2 설치
+RUN npm i -g pm2@latest
+
+# 포트 선언 (매핑 아님)
+EXPOSE 4000
+
+# exec 형식으로 지정
+ENTRYPOINT ["pm2-runtime"]
+CMD ["--json", "pm2Server.json"]

@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "properties": {
+    "human_resource_contract_idx": {
+      "type": "integer",
+      "description": "삭제할 계약인덱스",
+      "minimum": 1
+    }
+  },
+  "required": [
+    "human_resource_contract_idx"
+  ],
+  "additionalProperties": false,
+  "example": {
+    "human_resource_contract_idx": 1
+  }
+}

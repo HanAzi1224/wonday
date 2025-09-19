@@ -1,0 +1,63 @@
+{
+  "type": "object",
+  "properties": {
+    "human_resource_contract_idx": {
+      "type": "integer",
+      "description": "계약인덱스",
+      "minimum": 1
+    },
+    "contract_name": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "계약명",
+      "minLength": 1
+    },
+    "one_line_explain": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "한줄설명"
+    },
+    "contract_start_dt": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "계약시작일 (YYYY-MM-DD 형식)"
+    },
+    "contract_end_dt": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "계약종료일 (YYYY-MM-DD 형식)"
+    },
+    "contract_status": {
+      "type": "string",
+      "description": "계약상태",
+      "enum": ["신규", "갱신", "변경", "완료", "퇴사"]
+    },
+    "contract_amount": {
+      "type": "integer",
+      "description": "계약금액",
+      "minimum": 0
+    },
+    "contract_images": {
+      "type": "array",
+      "description": "계약서 이미지 (전체 교체)",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "human_resource_contract_idx"
+  ],
+  "additionalProperties": false,
+  "example": {
+    "contract_name": "정규직 근로계약 (수정)",
+    "one_line_explain": "정규직 전환 계약 - 수정됨",
+    "contract_start_dt": "2025-10-01",
+    "contract_end_dt": "2027-09-30",
+    "contract_status": "갱신",
+    "contract_amount": 60000000,
+    "contract_images": ["https://example.com/updated_image.jpg"]
+  }
+}

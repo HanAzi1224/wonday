@@ -1,0 +1,68 @@
+{
+  "type": "object",
+  "properties": {
+    "human_resource_idx": {
+      "type": "integer",
+      "description": "인사관리인덱스",
+      "minimum": 1
+    },
+    "contract_name": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "계약명",
+      "minLength": 1
+    },
+    "one_line_explain": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "한줄설명"
+    },
+    "contract_start_dt": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "계약시작일 (YYYY-MM-DD 형식)"
+    },
+    "contract_end_dt": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "계약종료일 (YYYY-MM-DD 형식)"
+    },
+    "contract_status": {
+      "type": "string",
+      "description": "계약상태",
+      "enum": ["신규", "갱신", "변경", "완료", "퇴사"]
+    },
+    "contract_amount": {
+      "type": "integer",
+      "description": "계약금액",
+      "minimum": 0
+    },
+    "contract_images": {
+      "type": "array",
+      "description": "계약서 이미지",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "human_resource_idx",
+    "contract_name",
+    "contract_start_dt",
+    "contract_end_dt",
+    "contract_status"
+  ],
+  "additionalProperties": false,
+  "example": {
+    "human_resource_idx": 1,
+    "contract_name": "정규직 근로계약",
+    "one_line_explain": "정규직 전환 계약",
+    "contract_start_dt": "2025-10-01",
+    "contract_end_dt": "2026-09-30",
+    "contract_status": "신규",
+    "contract_amount": 50000000,
+    "contract_images": ["https://example.com/image.jpg", "https://example.com/image2.jpg"]
+  }
+}

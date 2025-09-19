@@ -1,6 +1,6 @@
 const db = require('../../../models')
 const {getPageData, getPageInfo} = require('../../../components/util')
-const {MANAGE_TYPE} = require('../../../models/enums')
+const {MANAGE_TYPE, CONTRACT_STATUS} = require('../../../models/enums')
 
 // 인사정보 생성 (Create)
 module.exports.createHumanResource = async (req, res, next) => {
@@ -127,6 +127,25 @@ module.exports.getHumanResourceDetail = async (req, res, next) => {
           model: db.Users,
           as: 'user',
           attributes: ['user_idx', 'user_id', 'user_name', 'user_phone']
+        },
+        {
+          model: db.HumanResourceContract,
+          as: 'contracts',
+          attributes: [
+            'human_resource_contract_idx',
+            'contract_name',
+            'contract_start_dt',
+            'contract_end_dt',
+            'contract_status',
+            'contract_amount'
+          ],
+          include: [
+            {
+              model: db.ContractImages,
+              as: 'contract_images',
+              attributes: ['contract_image_idx', 'image_url', 'first_create_dt']
+            }
+          ]
         }
       ]
     })
@@ -252,6 +271,250 @@ module.exports.getNoneRegisteredUsers = async (req, res, next) => {
       message: `전체 ${users.length}명 중 인사정보에 등록되지 않은 유저 ${noneRegisteredUsers.length}명을 조회했습니다.`
     })
   } catch (error) {
+    next(error)
+  }
+}
+
+// 인사정보 계약 생성 (Create Contract)
+module.exports.createHumanResourceContract = async (req, res, next) => {
+  const {
+    human_resource_idx,
+    contract_name,
+    one_line_explain,
+    contract_start_dt,
+    contract_end_dt,
+    contract_status,
+    contract_amount,
+    contract_images
+  } = req.options
+
+  const transaction = await db.sequelize.transaction()
+
+  try {
+    // 인사정보 존재 확인
+    const humanResource = await db.HumanResource.findOne({
+      where: {human_resource_idx},
+      transaction
+    })
+
+    if (!humanResource) {
+      throw {status: 404, errorMessage: '인사정보를 찾을 수 없습니다.'}
+    }
+
+    // 계약 상태 유효성 검사
+    if (!Object.values(CONTRACT_STATUS).includes(contract_status)) {
+      throw {status: 400, errorMessage: '유효하지 않은 계약 상태입니다.'}
+    }
+
+    // 계약일 검증
+    const startDate = new Date(contract_start_dt)
+    const endDate = new Date(contract_end_dt)
+
+    if (startDate >= endDate) {
+      throw {status: 400, errorMessage: '계약 시작일은 종료일보다 빨라야 합니다.'}
+    }
+
+    // 계약 생성
+    const contract = await db.HumanResourceContract.create(
+      {
+        human_resource_idx,
+        contract_name,
+        one_line_explain,
+        contract_start_dt,
+        contract_end_dt,
+        contract_status,
+        contract_amount
+      },
+      {transaction}
+    )
+
+    // 계약 이미지 저장
+    if (Array.isArray(contract_images) && contract_images.length > 0) {
+      const contractImageData = contract_images.map((url) => ({
+        human_resource_contract_idx: contract.human_resource_contract_idx,
+        image_url: url
+      }))
+      await db.ContractImages.bulkCreate(contractImageData, {transaction})
+    }
+
+    await transaction.commit()
+
+    // 생성된 계약 정보와 관련 인사정보 조회
+    const createdContract = await db.HumanResourceContract.findOne({
+      where: {human_resource_contract_idx: contract.human_resource_contract_idx},
+      include: [
+        {
+          model: db.HumanResource,
+          as: 'human_resource',
+          include: [
+            {
+              model: db.Users,
+              as: 'user',
+              attributes: ['user_idx', 'user_id', 'user_name', 'user_phone']
+            }
+          ]
+        },
+        {
+          model: db.ContractImages,
+          as: 'contract_images',
+          attributes: ['contract_image_idx', 'image_url', 'first_create_dt']
+        }
+      ]
+    })
+
+    res.status(201).json({
+      success: true,
+      message: '계약이 성공적으로 생성되었습니다.',
+      data: createdContract
+    })
+  } catch (error) {
+    await transaction.rollback()
+    next(error)
+  }
+}
+
+// 인사정보 계약 수정 (Update Contract)
+module.exports.updateHumanResourceContract = async (req, res, next) => {
+  const {
+    human_resource_contract_idx,
+    contract_name,
+    one_line_explain,
+    contract_start_dt,
+    contract_end_dt,
+    contract_status,
+    contract_amount,
+    contract_images
+  } = req.options
+
+  const transaction = await db.sequelize.transaction()
+
+  try {
+    // 계약 존재 확인
+    const existingContract = await db.HumanResourceContract.findOne({
+      where: {human_resource_contract_idx},
+      transaction
+    })
+
+    if (!existingContract) {
+      throw {status: 404, errorMessage: '계약을 찾을 수 없습니다.'}
+    }
+
+    // 계약 상태 유효성 검사
+    if (contract_status && !Object.values(CONTRACT_STATUS).includes(contract_status)) {
+      throw {status: 400, errorMessage: '유효하지 않은 계약 상태입니다.'}
+    }
+
+    // 계약일 검증
+    let startDate, endDate
+    if (contract_start_dt || contract_end_dt) {
+      startDate = new Date(contract_start_dt || existingContract.contract_start_dt)
+      endDate = new Date(contract_end_dt || existingContract.contract_end_dt)
+
+      if (startDate >= endDate) {
+        throw {status: 400, errorMessage: '계약 시작일은 종료일보다 빨라야 합니다.'}
+      }
+    }
+
+    // 수정할 데이터 준비
+    const updateData = {}
+    if (contract_name !== undefined) updateData.contract_name = contract_name
+    if (one_line_explain !== undefined) updateData.one_line_explain = one_line_explain
+    if (contract_start_dt !== undefined) updateData.contract_start_dt = contract_start_dt
+    if (contract_end_dt !== undefined) updateData.contract_end_dt = contract_end_dt
+    if (contract_status !== undefined) updateData.contract_status = contract_status
+    if (contract_amount !== undefined) updateData.contract_amount = contract_amount
+
+    // 계약 정보 수정
+    await existingContract.update(updateData, {transaction})
+
+    // 계약 이미지 수정 (새로운 이미지 배열이 제공된 경우)
+    if (Array.isArray(contract_images)) {
+      // 기존 이미지들 삭제 (soft delete)
+      await db.ContractImages.destroy({
+        where: {human_resource_contract_idx},
+        transaction
+      })
+
+      // 새로운 이미지들 추가
+      if (contract_images.length > 0) {
+        const contractImageData = contract_images.map((url) => ({
+          human_resource_contract_idx,
+          image_url: url
+        }))
+        await db.ContractImages.bulkCreate(contractImageData, {transaction})
+      }
+    }
+
+    await transaction.commit()
+
+    // 수정된 계약 정보 조회
+    const updatedContract = await db.HumanResourceContract.findOne({
+      where: {human_resource_contract_idx},
+      include: [
+        {
+          model: db.HumanResource,
+          as: 'human_resource',
+          include: [
+            {
+              model: db.Users,
+              as: 'user',
+              attributes: ['user_idx', 'user_id', 'user_name', 'user_phone']
+            }
+          ]
+        },
+        {
+          model: db.ContractImages,
+          as: 'contract_images',
+          attributes: ['contract_image_idx', 'image_url', 'first_create_dt']
+        }
+      ]
+    })
+
+    res.status(200).json({
+      success: true,
+      message: '계약이 성공적으로 수정되었습니다.',
+      data: updatedContract
+    })
+  } catch (error) {
+    await transaction.rollback()
+    next(error)
+  }
+}
+
+// 인사정보 계약 삭제 (Delete Contract - Soft Delete)
+module.exports.deleteHumanResourceContract = async (req, res, next) => {
+  const {human_resource_contract_idx} = req.options
+
+  const transaction = await db.sequelize.transaction()
+
+  try {
+    // 계약 존재 확인
+    const existingContract = await db.HumanResourceContract.findOne({
+      where: {human_resource_contract_idx},
+      transaction
+    })
+
+    if (!existingContract) {
+      throw {status: 404, errorMessage: '계약을 찾을 수 없습니다.'}
+    }
+
+    // 관련된 계약 이미지들 먼저 삭제 (soft delete)
+    await db.ContractImages.destroy({
+      where: {human_resource_contract_idx},
+      transaction
+    })
+
+    // 계약 삭제 (soft delete)
+    await existingContract.destroy({transaction})
+
+    await transaction.commit()
+
+    res.status(200).json({
+      success: true,
+      message: '계약이 성공적으로 삭제되었습니다.'
+    })
+  } catch (error) {
+    await transaction.rollback()
     next(error)
   }
 }

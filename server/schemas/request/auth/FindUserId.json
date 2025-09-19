@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "user_name": {
+      "type": "string",
+      "maxLength": 50,
+      "description": "이름"
+    },
+    "user_phone": {
+      "type": "string",
+      "maxLength": 50,
+      "description": "연락처",
+      "pattern": "^010\\d{8}$"
+    }
+  },
+  "additionalProperties": false,
+  "required": ["user_name", "user_phone"],
+  "example": {
+    "user_name": "홍길동",
+    "user_phone": "01012341234"
+  }
+}

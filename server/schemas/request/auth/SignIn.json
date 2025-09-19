@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "사용자의  ID"
+    },
+    "user_pwd": {
+      "type": "string",
+      "description": "사용자의 비밀번호"
+    },
+    "fcm_token": {
+      "type": "string"
+    }
+  },
+  "required": ["user_id", "user_pwd"],
+  "additionalProperties": false,
+  "example": {
+    "user_id": "test@test.com",
+    "user_pwd": "test1234",
+    "fcm_token": "fcm_token"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "유저ID",
+      "format": "email"
+    },
+    "user_name": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "유저 이름"
+    },
+    "user_phone": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "휴대폰번호",
+      "pattern": "^010\\d{8}$"
+    },
+    "user_pwd": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "유저 비밀번호"
+    }
+  },
+  "required": [
+    "user_id",
+    "user_name",
+    "user_phone",
+    "user_pwd"
+  ],
+  "additionalProperties": false,
+  "example": {
+    "user_id": "test@test.com",
+    "user_name": "홍길동",
+    "user_phone": "01012341234",
+    "user_pwd": "test1234"
+  }
+}

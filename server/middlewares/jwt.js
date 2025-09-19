@@ -17,7 +17,7 @@ module.exports = async (req, res, next) => {
     req.jwtToken = jwtToken
 
     if (jwtToken.user_idx) {
-      const userChk = await db.User.findOne({where: {user_idx: jwtToken.user_idx}})
+      const userChk = await db.Users.findOne({where: {user_idx: jwtToken.user_idx}})
       if (!userChk) throw {status: 400, errorMessage: '존재하지 않는 사용자입니다.'}
     }
     // else if (jwtToken.master_idx) {

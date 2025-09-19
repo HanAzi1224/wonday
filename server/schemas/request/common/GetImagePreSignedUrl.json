@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "properties": {
+    "mimetype": {
+      "type": "string",
+      "example": "image/png"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["test"]
+    },
+    "extension": {
+      "type": "string",
+      "example": "png"
+    }
+  },
+  "required": ["mimetype", "type", "extension"]
+}

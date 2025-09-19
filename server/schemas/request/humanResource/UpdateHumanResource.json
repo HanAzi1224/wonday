@@ -1,0 +1,46 @@
+{
+  "type": "object",
+  "properties": {
+    "human_resource_idx": {
+      "type": "string",
+      "description": "인사정보 인덱스",
+      "pattern": "^[1-9]\\d*$"
+    },
+    "position": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "직위"
+    },
+    "department": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "부서"
+    },
+    "user_image": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "유저이미지 URL"
+    },
+    "manage_type": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "업무영역",
+      "enum": ["마케팅", "MCN", "기타"]
+    },
+    "employment_dt": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "입사일 (YYYY-MM-DD 형식)"
+    }
+  },
+  "required": ["human_resource_idx"],
+  "additionalProperties": false,
+  "example": {
+    "position": "시니어 개발자",
+    "department": "기술팀",
+    "user_image": "https://example.com/updated-image.jpg",
+    "manage_type": "기타",
+    "employment_dt": "2023-02-01"
+  }
+}

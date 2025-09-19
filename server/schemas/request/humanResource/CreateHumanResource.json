@@ -1,0 +1,49 @@
+{
+  "type": "object",
+  "properties": {
+    "user_idx": {
+      "type": "integer",
+      "description": "유저인덱스",
+      "minimum": 1
+    },
+    "position": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "직위"
+    },
+    "department": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "부서"
+    },
+    "user_image": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "유저이미지 URL"
+    },
+    "manage_type": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "업무영역",
+      "enum": ["마케팅", "MCN", "기타"]
+    },
+    "employment_dt": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "입사일 (YYYY-MM-DD 형식)"
+    }
+  },
+  "required": [
+    "user_idx"
+  ],
+  "additionalProperties": false,
+  "example": {
+    "user_idx": 2,
+    "position": "팀장",
+    "department": "개발팀",
+    "user_image": "https://example.com/image.jpg",
+    "manage_type": "기타",
+    "employment_dt": "2025-09-19"
+  }
+}

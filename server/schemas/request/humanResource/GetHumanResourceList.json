@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "properties": {
+    "manage_type": {
+      "type": "string",
+      "description": "업무영역",
+      "enum": ["마케팅", "MCN", "기타"]
+    },
+    "start_dt": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "시작일 (YYYY-MM-DD 형식)"
+    },
+    "end_dt": {
+      "type": "string",
+      "format": "date", 
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "종료일 (YYYY-MM-DD 형식)"
+    }
+  },
+  "additionalProperties": false,
+  "example": {
+    "manage_type": "마케팅",
+    "start_dt": "2025-01-01",
+    "end_dt": "2025-12-31"
+  }
+}

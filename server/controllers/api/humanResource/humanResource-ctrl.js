@@ -63,6 +63,7 @@ module.exports.createHumanResource = async (req, res, next) => {
 module.exports.getHumanResourceList = async (req, res, next) => {
   const {manage_type, start_dt, end_dt} = req.options
 
+  // Get pagination parameters (page number and items per page)
   const {page, limit} = getPageData(req.options)
 
   try {
@@ -74,25 +75,26 @@ module.exports.getHumanResourceList = async (req, res, next) => {
       }
     }
 
-    // 날짜 범위 조건 (start_dt 이상, end_dt 이하 - 경계값 포함)
+    // Date range condition (from start_dt to end_dt - inclusive of boundary values)
     if (start_dt && end_dt) {
-      // end_dt에 하루 끝 시간 추가 (23:59:59)
+      // Add end-of-day time to end_dt (23:59:59)
       const endDateTime = new Date(end_dt)
       endDateTime.setHours(23, 59, 59, 999)
 
       whereClause.first_create_dt = {
-        [db.Sequelize.Op.gte]: start_dt, // 시작일 이상
-        [db.Sequelize.Op.lte]: endDateTime // 종료일 23:59:59 이하
+        [db.Sequelize.Op.gte]: start_dt, // Greater than or equal to start date
+        [db.Sequelize.Op.lte]: endDateTime // Less than or equal to end date 23:59:59
       }
     } else if (start_dt) {
-      whereClause.first_create_dt = {[db.Sequelize.Op.gte]: start_dt} // 시작일 이상
+      whereClause.first_create_dt = {[db.Sequelize.Op.gte]: start_dt} // Greater than or equal to start date
     } else if (end_dt) {
-      // end_dt에 하루 끝 시간 추가 (23:59:59)
+      // Add end-of-day time to end_dt (23:59:59)
       const endDateTime = new Date(end_dt)
       endDateTime.setHours(23, 59, 59, 999)
-      whereClause.first_create_dt = {[db.Sequelize.Op.lte]: endDateTime} // 종료일 23:59:59 이하
+      whereClause.first_create_dt = {[db.Sequelize.Op.lte]: endDateTime} // Less than or equal to end date 23:59:59
     }
 
+    // Execute query with pagination and get total count
     const {count: totalCount, rows} = await db.HumanResource.findAndCountAll({
       where: whereClause,
       include: [
@@ -102,11 +104,12 @@ module.exports.getHumanResourceList = async (req, res, next) => {
           attributes: ['user_idx', 'user_id', 'user_name', 'user_phone']
         }
       ],
-      offset: (page - 1) * limit,
+      offset: (page - 1) * limit, // Calculate offset for pagination
       limit,
-      order: [['first_create_dt', 'DESC']]
+      order: [['first_create_dt', 'DESC']] // Order by creation date descending
     })
 
+    // Generate pagination information
     const pagination = getPageInfo(totalCount, page, limit)
 
     return res.status(200).json({result: true, data: {rows, pagination}})
@@ -115,7 +118,7 @@ module.exports.getHumanResourceList = async (req, res, next) => {
   }
 }
 
-// 인사정보 상세 조회 (Read Detail)
+// Get human resource detail information (Read Detail)
 module.exports.getHumanResourceDetail = async (req, res, next) => {
   const {human_resource_idx} = req.options
 
@@ -151,7 +154,7 @@ module.exports.getHumanResourceDetail = async (req, res, next) => {
     })
 
     if (!humanResource) {
-      throw {status: 404, errorMessage: '인사정보를 찾을 수 없습니다.'}
+      throw {status: 404, errorMessage: 'Human resource information not found.'}
     }
 
     res.status(200).json({
@@ -177,7 +180,7 @@ module.exports.updateHumanResource = async (req, res, next) => {
     })
 
     if (!humanResource) {
-      throw {status: 404, errorMessage: '인사정보를 찾을 수 없습니다.'}
+      throw {status: 404, errorMessage: 'Human resource information not found.'}
     }
 
     // 수정할 데이터 준비
@@ -230,7 +233,7 @@ module.exports.deleteHumanResource = async (req, res, next) => {
     })
 
     if (!humanResource) {
-      throw {status: 404, errorMessage: '인사정보를 찾을 수 없습니다.'}
+      throw {status: 404, errorMessage: 'Human resource information not found.'}
     }
 
     // Soft Delete 수행
@@ -298,7 +301,7 @@ module.exports.createHumanResourceContract = async (req, res, next) => {
     })
 
     if (!humanResource) {
-      throw {status: 404, errorMessage: '인사정보를 찾을 수 없습니다.'}
+      throw {status: 404, errorMessage: 'Human resource information not found.'}
     }
 
     // 계약 상태 유효성 검사
@@ -427,15 +430,15 @@ module.exports.updateHumanResourceContract = async (req, res, next) => {
     // 계약 정보 수정
     await existingContract.update(updateData, {transaction})
 
-    // 계약 이미지 수정 (새로운 이미지 배열이 제공된 경우)
+    // Update contract images (when a new image array is provided)
     if (Array.isArray(contract_images)) {
-      // 기존 이미지들 삭제 (soft delete)
+      // Delete existing images (soft delete)
       await db.ContractImages.destroy({
         where: {human_resource_contract_idx},
         transaction
       })
 
-      // 새로운 이미지들 추가
+      // Add new images
       if (contract_images.length > 0) {
         const contractImageData = contract_images.map((url) => ({
           human_resource_contract_idx,
@@ -498,13 +501,13 @@ module.exports.deleteHumanResourceContract = async (req, res, next) => {
       throw {status: 404, errorMessage: '계약을 찾을 수 없습니다.'}
     }
 
-    // 관련된 계약 이미지들 먼저 삭제 (soft delete)
+    // Delete related contract images first (soft delete)
     await db.ContractImages.destroy({
       where: {human_resource_contract_idx},
       transaction
     })
 
-    // 계약 삭제 (soft delete)
+    // Delete contract (soft delete)
     await existingContract.destroy({transaction})
 
     await transaction.commit()

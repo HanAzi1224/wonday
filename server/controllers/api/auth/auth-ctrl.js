@@ -212,29 +212,29 @@ module.exports.findUserId = async (req, res, next) => {
   }
 }
 
-module.exports.verifyAuthSms = async (req, res, next) => {
-  const {phone, auth_number} = req.options // Assuming phone and auth_number are sent in the request body
+// module.exports.verifyAuthSms = async (req, res, next) => {
+//   const {phone, auth_number} = req.options // Assuming phone and auth_number are sent in the request body
 
-  try {
-    // Find the most recent SMS auth record for the given phone number
-    const smsAuthRecord = await db.SmsAuth.findOne({
-      where: {phone},
-      order: [['first_create_dt', 'DESC']]
-    })
+//   try {
+//     // Find the most recent SMS auth record for the given phone number
+//     const smsAuthRecord = await db.SmsAuth.findOne({
+//       where: {phone},
+//       order: [['first_create_dt', 'DESC']]
+//     })
 
-    if (!smsAuthRecord) {
-      throw {status: 404, errorMessage: '인증번호가 일치하지 않습니다.'}
-    }
+//     if (!smsAuthRecord) {
+//       throw {status: 404, errorMessage: '인증번호가 일치하지 않습니다.'}
+//     }
 
-    // Check if the provided auth number matches the one in the record
-    if (smsAuthRecord.auth_number !== auth_number) {
-      throw {status: 404, errorMessage: '인증번호가 일치하지 않습니다.'}
-    }
+//     // Check if the provided auth number matches the one in the record
+//     if (smsAuthRecord.auth_number !== auth_number) {
+//       throw {status: 404, errorMessage: '인증번호가 일치하지 않습니다.'}
+//     }
 
-    // If the numbers match
-    res.status(200).json({result: true})
-  } catch (err) {
-    console.error(err)
-    next(err)
-  }
-}
+//     // If the numbers match
+//     res.status(200).json({result: true})
+//   } catch (err) {
+//     console.error(err)
+//     next(err)
+//   }
+// }

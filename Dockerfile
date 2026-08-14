@@ -17,7 +17,7 @@ COPY . .
 RUN npm i -g pm2@latest
 
 # 포트 선언 (매핑 아님)
-EXPOSE 4001
+EXPOSE 4000
 
 # exec 형식으로 지정
 ENTRYPOINT ["pm2-runtime"]

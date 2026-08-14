@@ -10,13 +10,16 @@ services:
         max-file: '1'
     depends_on:
       - redis
-    ports:
-      - '4001:4001'
     environment:
+      - VIRTUAL_HOST=sajusun.hnsehn.com
+      - VIRTUAL_PORT=4000
+      - LETSENCRYPT_HOST=sajusun.hnsehn.com
+      - LETSENCRYPT_EMAIL=saehyun9906@gmail.com
       - TZ=Asia/Seoul
       - NODE_ENV=production
       - AWS_DEFAULT_REGION=ap-northeast-2
     networks:
+      - nginx-proxy
       - redis-connect
     links:
       - redis:redis
@@ -36,6 +39,37 @@ services:
     networks:
       - redis-connect
 
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    ports:
+      - '80:80'
+      - '443:443'
+    restart: always
+    volumes:
+      - /nginx/certs:/etc/nginx/certs
+      - /nginx/vhost.d:/etc/nginx/vhost.d
+      - /nginx/html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - /home/ubuntu/custom.conf:/etc/nginx/conf.d/custom.conf
+    labels:
+      - com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy
+    networks:
+      - nginx-proxy
+
+  letsencrypt-nginx-proxy:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    restart: always
+    volumes:
+      - /nginx/certs:/etc/nginx/certs
+      - /nginx/vhost.d:/etc/nginx/vhost.d
+      - /nginx/html:/usr/share/nginx/html
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /nginx/acme:/etc/acme.sh
+    networks:
+      - nginx-proxy
+
 networks:
+  nginx-proxy:
+    name: nginx-proxy
   redis-connect:
     driver: bridge

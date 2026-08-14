@@ -39,7 +39,7 @@ RUN echo @edge http://nl.alpinelinux.org/alpine/edge/community >> /etc/apk/repos
 RUN mkdir -p /var/run/dbus && \
     dbus-uuidgen > /var/lib/dbus/machine-id
 
-EXPOSE 4001
+EXPOSE 4000
 
 WORKDIR /app
 

@@ -51,7 +51,7 @@ jobs:
       - name: Copy deploy files to EC2
         run: |
           scp -o StrictHostKeyChecking=no -i deploy_key.pem \
-            docker-compose-prod.yml scripts/deploy-stage.sh \
+            docker-compose-prod.yml scripts/deploy-stage.sh scripts/custom.conf \
             "$EC2_USER@$EC2_HOST":/home/ubuntu
 
       - name: Run remote deploy

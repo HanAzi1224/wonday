@@ -1,5 +1,5 @@
 // number should be converted from string first
-const srvPort = Number(process.env.PORT || '4001')
+const srvPort = Number(process.env.PORT || '4000')
 
 const dbHost = process.env.MYSQL_HOST
 const dbName = process.env.MYSQL_DATABASE

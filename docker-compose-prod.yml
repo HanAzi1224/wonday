@@ -1,0 +1,41 @@
+version: '3.6'
+services:
+  sajusun-api:
+    image: 161363670536.dkr.ecr.ap-northeast-2.amazonaws.com/sajusun:latest
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: '5m'
+        max-file: '1'
+    depends_on:
+      - redis
+    ports:
+      - '4001:4001'
+    environment:
+      - TZ=Asia/Seoul
+      - NODE_ENV=production
+      - AWS_DEFAULT_REGION=ap-northeast-2
+    networks:
+      - redis-connect
+    links:
+      - redis:redis
+
+  redis:
+    image: redis:4
+    container_name: redis
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: '5m'
+        max-file: '1'
+    hostname: redis
+    environment:
+      - TZ=Asia/Seoul
+    networks:
+      - redis-connect
+
+networks:
+  redis-connect:
+    driver: bridge

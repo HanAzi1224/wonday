@@ -9,28 +9,10 @@ dotenv.config({
 })
 
 const app = express()
-const session = require('express-session')
 const logger = require('./logger')
 const assignId = require('../middlewares/assignId')
 const morgan = require('../middlewares/morgan')
 const routes = require('../routes')
-const {redisClient, RedisStore} = require('./redis') // 새로운 import문
-
-const sess = {
-  name: 'everywhere.sid',
-  secret: '!@teameverywhere@!',
-  resave: false,
-  rolling: true,
-  saveUninitialized: false,
-  store: new RedisStore({client: redisClient}),
-  cookie: {
-    secure: process.env.NODE_ENV !== 'test',
-    sameSite: process.env.NODE_ENV === 'test' ? 'lax' : 'none',
-    httpOnly: true,
-    maxAge: 60 * 60 * 2 * 1000
-  }
-}
-app.use(session(sess))
 
 app.enable('trust proxy')
 app.set('etag', false)

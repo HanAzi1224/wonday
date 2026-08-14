@@ -35,16 +35,11 @@ module.exports = {
     secretAccessKey: process.env.SECRET_ACCESS_KEY,
     s3: {
       host: 'https://s3-ap-northeast-2.amazonaws.com',
-      bucket: 'aurumworks',
-      frontPath: 'https://s3.ap-northeast-2.amazonaws.com/aurumworks',
+      bucket: 'sajusun',
+      frontPath: 'https://s3.ap-northeast-2.amazonaws.com/sajusun',
       originUserImage: 'original',
       thumbnailUserImage: 'thumbnails'
     }
-  },
-  elasticSearch: {
-    node: '',
-    username: '',
-    password: process.env.ES_PASSWORD
   },
   swagger: {
     id: 'tew',

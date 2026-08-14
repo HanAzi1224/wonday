@@ -169,7 +169,7 @@ module.exports.generateBarcode = (barcodeNum) => {
         if (err) {
           reject(err)
         } else {
-          const path = `barcode/${uuid.v4()}.png`
+          const path = `files/barcode/${uuid.v4()}.png`
           const url = s3.generatePreSignedUrl({key: path, mimetype: 'image/png'})
 
           // AWS 버킷에 이미지 저장

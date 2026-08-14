@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(aws ecr *)",
+      "Bash(aws s3 *)",
+      "Bash(node --check server/models/index.js)"
+    ]
+  }
+}

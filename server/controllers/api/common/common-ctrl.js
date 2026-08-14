@@ -8,7 +8,7 @@ module.exports.getImageUrl = async (req, res, next) => {
     const {type, mimetype, extension} = req.options
     const result = []
 
-    const path = `${type}/${uuid.v4()}.${extension}`
+    const path = `files/${type}/${uuid.v4()}.${extension}`
     const url = s3.generatePreSignedUrl({
       key: path,
       mimetype

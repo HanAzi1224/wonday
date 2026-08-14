@@ -5,7 +5,6 @@ const jwtService = require('jsonwebtoken')
 const jwt = require('../../../libs/jwt')
 const db = require('../../../models')
 const aligoapi = require('../../../components/sms')
-const emailapi = require('../../../components/email')
 const {businessNumChk} = require('../../../components/businessNum')
 const {USER_TYPE, LOGIN_TYPE, GRADE} = require('../../../models/enums')
 

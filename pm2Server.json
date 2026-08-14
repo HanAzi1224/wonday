@@ -1,7 +1,7 @@
 {
   "apps": [
     {
-      "name": "aurumworks-api",
+      "name": "sajusun-api",
       "script": "./server/app.js",
       "instances": "1",
       "watch": false,

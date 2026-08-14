@@ -50,8 +50,8 @@ if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'producti
   //   format: format.combine(format.timestamp(), format.errors({stack: true}), format.splat(), loggerFormat)
   // })
   const s3stream = new S3StreamLogger({
-    bucket: 'tew-log',
-    folder: `${config.aws.s3.bucket}-${process.env.NODE_ENV}/${moment().tz('Asia/Seoul').format('yyyy-MM-DD')}`,
+    bucket: config.aws.s3.bucket,
+    folder: `logs/${process.env.NODE_ENV}/${moment().tz('Asia/Seoul').format('yyyy-MM-DD')}`,
     access_key_id: config.aws.accessKeyId,
     secret_access_key: config.aws.secretAccessKey,
     compress: true,

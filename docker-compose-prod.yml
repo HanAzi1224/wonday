@@ -1,7 +1,7 @@
 version: '3.6'
 services:
-  sajusun-api:
-    image: 161363670536.dkr.ecr.ap-northeast-2.amazonaws.com/sajusun:latest
+  wonday-api:
+    image: 161363670536.dkr.ecr.ap-northeast-2.amazonaws.com/wonday:latest
     restart: always
     logging:
       driver: json-file
@@ -11,9 +11,9 @@ services:
     depends_on:
       - redis
     environment:
-      - VIRTUAL_HOST=sajusun.hnsehn.com
+      - VIRTUAL_HOST=api.wonday.hnsehn.com
       - VIRTUAL_PORT=4000
-      - LETSENCRYPT_HOST=sajusun.hnsehn.com
+      - LETSENCRYPT_HOST=api.wonday.hnsehn.com
       - LETSENCRYPT_EMAIL=saehyun9906@gmail.com
       - TZ=Asia/Seoul
       - NODE_ENV=production

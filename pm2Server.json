@@ -1,7 +1,7 @@
 {
   "apps": [
     {
-      "name": "sajusun-api",
+      "name": "wonday-api",
       "script": "./server/app.js",
       "instances": "1",
       "watch": false,

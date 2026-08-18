@@ -30,8 +30,8 @@ module.exports = {
     secretAccessKey: process.env.SECRET_ACCESS_KEY,
     s3: {
       host: 'https://s3-ap-northeast-2.amazonaws.com',
-      bucket: 'sajusun',
-      frontPath: 'https://s3.ap-northeast-2.amazonaws.com/sajusun',
+      bucket: 'wonday',
+      frontPath: 'https://s3.ap-northeast-2.amazonaws.com/wonday',
       originUserImage: 'original',
       thumbnailUserImage: 'thumbnails'
     }
